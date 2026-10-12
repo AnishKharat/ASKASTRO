@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI
@@ -22,6 +23,11 @@ v1 = APIRouter(prefix="/v1")
 @v1.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@v1.post("/session")
+def session():
+    return {"user_id": str(uuid.uuid4())}
 
 
 app.include_router(v1)
