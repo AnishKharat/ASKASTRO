@@ -10,6 +10,7 @@ type ChatState = {
   streaming: boolean;
   add: (...m: Message[]) => void; // pass in display order, newest first
   patch: (id: string, fn: (content: string) => string) => void;
+  remove: (id: string) => void;
   setStreaming: (s: boolean) => void;
   clear: () => void;
 };
@@ -23,6 +24,7 @@ export const useChat = create<ChatState>()(
       add: (...m) => set((s) => ({ messages: [...m, ...s.messages] })),
       patch: (id, fn) =>
         set((s) => ({ messages: s.messages.map((x) => (x.id === id ? { ...x, content: fn(x.content) } : x)) })),
+      remove: (id) => set((s) => ({ messages: s.messages.filter((x) => x.id !== id) })),
       setStreaming: (streaming) => set({ streaming }),
       clear: () => set({ messages: [], conversationId: randomUUID() }),
     }),
