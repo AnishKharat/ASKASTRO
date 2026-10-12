@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { useSettings } from './store/settings';
 
 const palette = {
   midnight: '#0F1B3D', navy: '#1B2A5C', trustBlue: '#3B5BDB', periwinkle: '#8FA5FF',
@@ -28,10 +28,4 @@ export const radius = { sm: 8, md: 16, pill: 999 };
 // Body 16px / 1.5 line height per project_context; fonts (Lora/Inter) not loaded yet.
 export const type = { body: { fontSize: 16, lineHeight: 24 }, small: { fontSize: 14, lineHeight: 20 }, title: { fontSize: 22, lineHeight: 30 } };
 
-type Mode = keyof typeof themes;
-export const useThemeMode = create<{ mode: Mode; setMode: (m: Mode) => void }>((set) => ({
-  mode: 'dark',
-  setMode: (mode) => set({ mode }),
-}));
-
-export const useTheme = () => ({ colors: themes[useThemeMode((s) => s.mode)] });
+export const useTheme = () => ({ colors: themes[useSettings((s) => s.mode)] });
