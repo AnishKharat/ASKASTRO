@@ -5,15 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Message, streamChat } from '../api/chat';
 import ChatInput from '../components/ChatInput';
 import MessageBubble from '../components/MessageBubble';
+import { useChat } from '../store/chat';
 import { spacing, useTheme } from '../theme';
 
-// shortcut: state is local; the chat store (next roadmap item) replaces it.
 export default function ChatScreen() {
   const { colors } = useTheme();
-  const conversationId = useRef(randomUUID()).current;
-  const [messages, setMessages] = useState<Message[]>([]); // newest first, for the inverted list
+  const { conversationId, messages, streaming, add, patch, setStreaming } = useChat();
   const [text, setText] = useState('');
-  const [streaming, setStreaming] = useState(false);
   const abort = useRef<AbortController | null>(null);
 
   const make = (role: Message['role'], content: string): Message => ({
@@ -26,17 +24,15 @@ export default function ChatScreen() {
     const user = make('user', content);
     const reply = make('assistant', '');
     const history = [...messages].reverse().concat(user);
-    setMessages((m) => [reply, user, ...m]);
+    add(reply, user);
     setText('');
     setStreaming(true);
-    const patch = (fn: (c: string) => string) =>
-      setMessages((m) => m.map((x) => (x.id === reply.id ? { ...x, content: fn(x.content) } : x)));
     const ctrl = (abort.current = new AbortController());
     try {
-      await streamChat(history, (d) => patch((c) => c + d), ctrl.signal);
+      await streamChat(history, (d) => patch(reply.id, (c) => c + d), ctrl.signal);
     } catch {
       // Stopped by the user: keep the partial reply.
-      if (!ctrl.signal.aborted) patch((c) => c || 'Something went wrong. Please try again.');
+      if (!ctrl.signal.aborted) patch(reply.id, (c) => c || 'Something went wrong. Please try again.');
     } finally {
       setStreaming(false);
     }
