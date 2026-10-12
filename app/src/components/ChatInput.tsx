@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import { radius, spacing, type, useTheme } from '../theme';
+import GradientButton from './GradientButton';
 
 type Props = { value: string; onChange: (t: string) => void; onSend: () => void; onStop: () => void; streaming: boolean };
 
@@ -7,31 +8,30 @@ export default function ChatInput({ value, onChange, onSend, onStop, streaming }
   const { colors } = useTheme();
   const canSend = value.trim().length > 0;
   return (
-    <View style={styles.row}>
+    <View style={[styles.bar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <TextInput
         value={value}
         onChangeText={onChange}
         editable={!streaming}
-        placeholder="Ask about astrology…"
+        placeholder="Ask the stars…"
         placeholderTextColor={colors.textMuted}
         multiline
-        style={[type.body, styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+        style={[type.body, styles.input, { color: colors.text }]}
       />
-      <Pressable
+      <GradientButton
+        label={streaming ? '■' : '↑'}
+        accessibilityLabel={streaming ? 'Stop' : 'Send'}
         onPress={streaming ? onStop : onSend}
         disabled={!streaming && !canSend}
-        accessibilityRole="button"
-        accessibilityLabel={streaming ? 'Stop' : 'Send'}
-        style={[styles.btn, { backgroundColor: colors.primary, opacity: !streaming && !canSend ? 0.5 : 1 }]}
-      >
-        <Text style={[type.body, { color: colors.onPrimary }]}>{streaming ? 'Stop' : 'Send'}</Text>
-      </Pressable>
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm, padding: spacing.md },
-  input: { flex: 1, maxHeight: 120, minHeight: 44, borderRadius: radius.md, paddingHorizontal: spacing.md },
-  btn: { minHeight: 44, minWidth: 64, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  bar: {
+    flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm, margin: spacing.md,
+    padding: spacing.xs, borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth,
+  },
+  input: { flex: 1, maxHeight: 120, minHeight: 44, paddingHorizontal: spacing.md, paddingVertical: 10 },
 });

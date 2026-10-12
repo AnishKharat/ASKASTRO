@@ -1,5 +1,5 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Screen from '../components/Screen';
 import { useChat } from '../store/chat';
 import { useSettings } from '../store/settings';
 import { radius, spacing, type, useTheme } from '../theme';
@@ -16,34 +16,40 @@ export default function SettingsScreen() {
     ]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <Screen edges={['bottom']}>
       <View style={styles.body}>
-        <Text style={[type.body, { color: colors.textMuted }]}>Theme</Text>
-        <View style={styles.row}>
+        <Text style={[type.small, { color: colors.textMuted }]}>THEME</Text>
+        <View style={[styles.seg, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {(['dark', 'light'] as const).map((m) => (
             <Pressable
               key={m}
               onPress={() => setMode(m)}
               accessibilityRole="button"
               accessibilityState={{ selected: mode === m }}
-              style={[styles.btn, { backgroundColor: mode === m ? colors.primary : colors.surface, flex: 1 }]}
+              style={[styles.opt, mode === m && { backgroundColor: colors.primary }]}
             >
-              <Text style={[type.body, { color: mode === m ? colors.onPrimary : colors.text }]}>
-                {m === 'dark' ? 'Dark' : 'Light'}
+              <Text style={[type.bodyBold, { color: mode === m ? colors.onPrimary : colors.text }]}>
+                {m === 'dark' ? '☾  Dark' : '☀  Light'}
               </Text>
             </Pressable>
           ))}
         </View>
-        <Pressable onPress={confirmClear} accessibilityRole="button" style={[styles.btn, { backgroundColor: colors.surface }]}>
-          <Text style={[type.body, { color: colors.danger }]}>Clear chat</Text>
+        <Text style={[type.small, { color: colors.textMuted, marginTop: spacing.md }]}>DATA</Text>
+        <Pressable
+          onPress={confirmClear}
+          accessibilityRole="button"
+          style={[styles.clear, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        >
+          <Text style={[type.bodyBold, { color: colors.danger }]}>Clear chat</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: spacing.md, gap: spacing.md },
-  row: { flexDirection: 'row', gap: spacing.sm },
-  btn: { minHeight: 44, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  body: { padding: spacing.md, gap: spacing.sm },
+  seg: { flexDirection: 'row', padding: spacing.xs, borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth },
+  opt: { flex: 1, minHeight: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  clear: { minHeight: 44, borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
 });
