@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+import limits
 from llm import generate
 
 load_dotenv()
@@ -73,10 +74,13 @@ async def chat(req: ChatRequest, x_user_id: str = Header()):
                 int(os.getenv("CHAT_TOKEN_BUDGET", "3000")))
     if not msgs or msgs[-1]["role"] != "user":
         raise HTTPException(422, "Last message must be from the user")
+    limits.check(x_user_id)
 
     async def events():
+        limits.record(len(SYSTEM) + sum(len(m["content"]) for m in msgs))
         try:
             async for text in generate(msgs, SYSTEM):
+                limits.record(len(text))
                 yield f"data: {json.dumps({'delta': text})}\n\n"
         except Exception:
             yield f"data: {json.dumps({'error': 'generation_failed'})}\n\n"
